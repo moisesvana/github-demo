@@ -1,0 +1,23 @@
+name: ci-deploy
+on:
+  push:
+    branches: [main, qa, dev]
+    paths-ignore:
+      - "**.md"
+
+env:
+  AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+  AWS_ACCOUNT: >-
+    ${{ fromJSON(format('{{"refs/heads/main": "{0}", "refs/heads/qa": "{1}", "refs/heads/dev": "{2}"}}', vars.PROD_AWS_ACCOUNT_ID, vars.QA_AWS_ACCOUNT_ID, vars.DEV_AWS_ACCOUNT_ID))[github.ref] }}
+  ENVIRONMENT_TYPE: >-
+    ${{ fromJSON('{"refs/heads/main": "prod", "refs/heads/qa": "qa", "refs/heads/dev": "dev"}')[github.ref] }}
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Echo
+        run: |
+          echo $AWS_ACCOUNT
